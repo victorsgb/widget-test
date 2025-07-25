@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   Box,
   Typography,
@@ -6,19 +7,18 @@ import {
   Stack,
   Avatar,
   IconButton,
+  Paper,
   TextField,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogActions,
+  Button
 } from '@mui/material';
 
 import {
   Person as PersonIcon,
-  SmartToy as BotIcon,
-  Send as SendIcon,
+  SmartToy as BotIcon
 } from '@mui/icons-material';
+
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import SendIcon from '@mui/icons-material/Send';
 
 import { useSocket } from '../context/SocketContext';
 import { formatDateTime } from '../utils/formatDateTime';
@@ -86,19 +86,20 @@ function ChatPanel() {
 
           return (
             <Box key={message.createdAt}>
-              {!isSystem && (
+              { !isSystem && (
                 <Box sx={{ display: 'flex', flexDirection: isUser ? 'row' : 'row-reverse', gap: 1 }}>
                   <Avatar>{isUser ? <PersonIcon /> : <BotIcon />}</Avatar>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Box sx={{ bgcolor: isUser ? '#fbc' : '#222', p: 1.5, borderRadius: 2 }}>
                       <Typography variant="body2" sx={{ color: isUser ? '#222' : '#fff' }}>{message.message}</Typography>
                     </Box>
+
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <Typography variant="caption" sx={{ color: '#aaa' }}>{message.name}</Typography>
                       <Typography variant="caption" sx={{ color: '#aaa' }}>{time}</Typography>
                     </Box>
                   </Box>
-                </Box>
+                </Box>               
               )}
             </Box>
           );
@@ -112,67 +113,67 @@ function ChatPanel() {
           </Box>
         )}
       </Stack>
-      <Box sx={{ borderTop: 1, borderColor: '#333', p: 2 }}>
+      <Paper sx={{ borderTop: 1, borderColor: '#333', p: 2, bgcolor: 'transparent' }}>
         {sending && (
           <LinearProgress
             sx={{
-              backgroundColor: '#e0e0e0',
+              backgroundColor: '#e0e0e0', // cor da trilha (fundo)
               '& .MuiLinearProgress-bar': {
-                backgroundColor: '#fbc',
+                backgroundColor: '#fbc', // cor da barra em movimento
               },
             }}
           />
         )}
         {error && <Typography color='warning'>{error}</Typography>}
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <TextField
-            label="Type a message"
-            variant="standard"
-            fullWidth
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage(newMessage);
-              }
-            }}
-            multiline
-            maxRows={3}
-            disabled={sending}
-            sx={{
-              mb: 2,
-              backgroundColor: 'transparent',
-              '& .MuiInputBase-input': {
-                color: '#dddddd',
-                '::placeholder': {
-                  color: '#999999',
-                  opacity: 1,
-                },
+        <TextField
+          label="Type a message"
+          variant="standard"
+          fullWidth
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage(newMessage);
+            }
+          }}
+          multiline
+          maxRows={3}
+          disabled={sending}
+          sx={{
+            mb: 2,
+            backgroundColor: 'transparent',
+            '& .MuiInputBase-input': {
+              color: '#dddddd', // texto digitado
+              '::placeholder': {
+                color: '#999999', // placeholder (se houver)
+                opacity: 1,
               },
-              '& .MuiInputLabel-root': {
-                color: '#aaaaaa',
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#ffffff',
-              },
-              '& .MuiInput-underline:before': {
-                borderBottom: '1px solid #444444',
-              },
-              '& .MuiInput-underline:hover:before': {
-                borderBottom: '1px solid #888888',
-              },
-              '& .MuiInput-underline:after': {
-                borderBottom: '2px solid #fbc',
-              },
-              '& .Mui-disabled': {
-                color: '#777777',
-              },
-              '& .MuiInput-underline.Mui-disabled:before': {
-                borderBottom: '1px dotted #555555',
-              },
-            }}
-          />
+            },
+            '& .MuiInputLabel-root': {
+              color: '#aaaaaa', // label quando não focado
+            },
+            '& .MuiInputLabel-root.Mui-focused': {
+              color: '#ffffff', // label quando focado
+            },
+            '& .MuiInput-underline:before': {
+              borderBottom: '1px solid #444444', // underline normal
+            },
+            '& .MuiInput-underline:hover:before': {
+              borderBottom: '1px solid #888888', // underline no hover
+            },
+            '& .MuiInput-underline:after': {
+              borderBottom: '2px solid #fbc', // underline quando focado
+            },
+            '& .Mui-disabled': {
+              color: '#777777', // texto quando desabilitado
+            },
+            '& .MuiInput-underline.Mui-disabled:before': {
+              borderBottom: '1px dotted #555555', // underline quando desabilitado
+            },
+          }}
+        />
           <IconButton
             onClick={() => handleSendMessage(newMessage)}
             disabled={!newMessage.trim() || sending}
@@ -191,7 +192,7 @@ function ChatPanel() {
             <SendIcon />
           </IconButton>
         </Box>
-      </Box>
+      </Paper>
     </Box>
   );
 
@@ -218,152 +219,162 @@ function ChatPanel() {
         <TawkeeLogo />
       </Box>
 
-      <Dialog
-        open={chatOpen}
-        onClose={() => setChatOpen(false)}
-        fullWidth
-        maxWidth="xs"
-        PaperProps={{
-          sx: {
-            backgroundColor: '#111',
-            color: '#eee',
-            borderRadius: 2,
-            overflow: 'hidden',
-            maxHeight: '80vh',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-      >
-        <DialogTitle sx={{ p: 2, borderBottom: 1, borderColor: '#333' }}>
-          <Typography variant="h6">Chat with one of our Agents!</Typography>
-        </DialogTitle>
-
-        <DialogContent sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
-          {!submitted ? (
-            <>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                To start, please fill in the information below:
-              </Typography>
-              <TextField
-                label="Name"
-                variant="standard"
-                value={userInfo.name}
-                onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-                fullWidth
-                placeholder="Enter your name"
-                sx={{
-                  mb: 2,
-                  backgroundColor: 'transparent',
-                  '& .MuiInputBase-input': {
-                    color: '#dddddd', // texto digitado
-                    '::placeholder': {
-                      color: '#999999', // placeholder (se houver)
-                      opacity: 1,
-                    },
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#aaaaaa', // label quando não focado
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#ffffff', // label quando focado
-                  },
-                  '& .MuiInput-underline:before': {
-                    borderBottom: '1px solid #444444', // underline normal
-                  },
-                  '& .MuiInput-underline:hover:before': {
-                    borderBottom: '1px solid #888888', // underline no hover
-                  },
-                  '& .MuiInput-underline:after': {
-                    borderBottom: '2px solid #fbc', // underline quando focado
-                  },
-                  '& .Mui-disabled': {
-                    color: '#777777', // texto quando desabilitado
-                  },
-                  '& .MuiInput-underline.Mui-disabled:before': {
-                    borderBottom: '1px dotted #555555', // underline quando desabilitado
-                  },
-                }}
-              />
-              <TextField
-                label="Contact info"
-                variant='standard'
-                value={userInfo.email}
-                onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-                fullWidth
-                placeholder="Enter your email or phone number"
-                sx={{
-                  mb: 2,
-                  backgroundColor: 'transparent',
-                  '& .MuiInputBase-input': {
-                    color: '#dddddd', // texto digitado
-                    '::placeholder': {
-                      color: '#999999', // placeholder (se houver)
-                      opacity: 1,
-                    },
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#aaaaaa', // label quando não focado
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#ffffff', // label quando focado
-                  },
-                  '& .MuiInput-underline:before': {
-                    borderBottom: '1px solid #444444', // underline normal
-                  },
-                  '& .MuiInput-underline:hover:before': {
-                    borderBottom: '1px solid #888888', // underline no hover
-                  },
-                  '& .MuiInput-underline:after': {
-                    borderBottom: '2px solid #fbc', // underline quando focado
-                  },
-                  '& .Mui-disabled': {
-                    color: '#777777', // texto quando desabilitado
-                  },
-                  '& .MuiInput-underline.Mui-disabled:before': {
-                    borderBottom: '1px dotted #555555', // underline quando desabilitado
-                  },
-                }}
-              />
-            </>
-          ) : (
-            chatBox
-          )}
-        </DialogContent>
-
-        <DialogActions sx={{ p: 2, borderTop: 1, borderColor: '#333', justifyContent: 'flex-end' }}>
-          {!submitted ? (
-            <Button
-              variant="contained"
-              onClick={() => {
-                if (userInfo.name && userInfo.email) setSubmitted(true);
-              }}
-              disabled={!userInfo.name || !userInfo.email}
+      {chatOpen && (
+        <ClickAwayListener onClickAway={() => setChatOpen(false)}>
+          <Box
+            sx={{
+              position: 'fixed',
+              bottom: 90,
+              right: 20,
+              zIndex: 1300,
+              display: 'block'
+            }}
+          >
+            <Paper
+              elevation={6}
               sx={{
-                color: '#ddd',
-                backgroundColor: '#444',
-                '&.Mui-disabled': {
-                  color: '#888',
-                  backgroundColor: '#222',
-                },
+                width: 360,
+                maxHeight: '80vh',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 2,
+                overflow: 'hidden',
+                backgroundColor: '#111',
+                color: '#eee',                               
               }}
             >
-              Start Chat
-            </Button>
-          ) : (
-            <Button
-              variant='text'
-              onClick={() => setChatOpen(false)}
-              sx={{
-                color: '#ddd',
-                backgroundColor: '#444',
-              }}
-            >
-              Close
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
+              <Box sx={{ p: 2, borderBottom: 1, borderColor: '#333' }}>
+                <Typography variant="h6">Chat with one of our Agents!</Typography>
+              </Box>
+
+              <Box sx={{ p: 2, flexGrow: 1, overflowY: 'hidden' }}>
+                {!submitted ? (
+                  <>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      To start, please fill in the information below:
+                    </Typography>
+                    <TextField
+                      label="Name"
+                      variant="standard"
+                      value={userInfo.name}
+                      onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                      fullWidth
+                      placeholder="Enter your name"
+                      sx={{
+                        mb: 2,
+                        backgroundColor: 'transparent',
+                        '& .MuiInputBase-input': {
+                          color: '#dddddd', // texto digitado
+                          '::placeholder': {
+                            color: '#999999', // placeholder (se houver)
+                            opacity: 1,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: '#aaaaaa', // label quando não focado
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#ffffff', // label quando focado
+                        },
+                        '& .MuiInput-underline:before': {
+                          borderBottom: '1px solid #444444', // underline normal
+                        },
+                        '& .MuiInput-underline:hover:before': {
+                          borderBottom: '1px solid #888888', // underline no hover
+                        },
+                        '& .MuiInput-underline:after': {
+                          borderBottom: '2px solid #fbc', // underline quando focado
+                        },
+                        '& .Mui-disabled': {
+                          color: '#777777', // texto quando desabilitado
+                        },
+                        '& .MuiInput-underline.Mui-disabled:before': {
+                          borderBottom: '1px dotted #555555', // underline quando desabilitado
+                        },
+                      }}
+                    />
+                    <TextField
+                      label="Contact info"
+                      variant='standard'
+                      value={userInfo.email}
+                      onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                      fullWidth
+                      placeholder="Enter your email or phone number"
+                      sx={{
+                        mb: 2,
+                        backgroundColor: 'transparent',
+                        '& .MuiInputBase-input': {
+                          color: '#dddddd', // texto digitado
+                          '::placeholder': {
+                            color: '#999999', // placeholder (se houver)
+                            opacity: 1,
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: '#aaaaaa', // label quando não focado
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#ffffff', // label quando focado
+                        },
+                        '& .MuiInput-underline:before': {
+                          borderBottom: '1px solid #444444', // underline normal
+                        },
+                        '& .MuiInput-underline:hover:before': {
+                          borderBottom: '1px solid #888888', // underline no hover
+                        },
+                        '& .MuiInput-underline:after': {
+                          borderBottom: '2px solid #fbc', // underline quando focado
+                        },
+                        '& .Mui-disabled': {
+                          color: '#777777', // texto quando desabilitado
+                        },
+                        '& .MuiInput-underline.Mui-disabled:before': {
+                          borderBottom: '1px dotted #555555', // underline quando desabilitado
+                        },
+                      }}                    
+                    />
+                  </>
+                ) : (
+                  chatBox
+                )}
+              </Box>
+
+              <Box sx={{ p: 2, borderTop: 1, borderColor: '#333', display: 'flex', justifyContent: 'flex-end' }}>
+                {!submitted ? (
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      if (userInfo.name && userInfo.email) setSubmitted(true);
+                    }}
+                    disabled={!userInfo.name || !userInfo.email}
+                    sx={{
+                      color: '#ddd',
+                      backgroundColor: '#444',
+                      '&.Mui-disabled': {
+                        color: '#888',
+                        backgroundColor: '#222',
+                      },
+                    }}
+                  >
+                    Start Chat
+                  </Button>
+                ) : (
+                  <Button
+                    variant='text'
+                    onClick={() => setChatOpen(false)}
+                    sx={{
+                      color: '#ddd',
+                      backgroundColor: '#444',
+                    }}                    
+                  >
+                    Close
+                  </Button>
+                )}
+              </Box>
+            </Paper>
+          </Box>
+        </ClickAwayListener>
+      )}
     </>
   );
 }
