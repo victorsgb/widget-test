@@ -3,14 +3,17 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'process.env': '{}', // evita referências a process.env.FOO falharem
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     lib: {
-      entry: 'src/main.tsx',         // <- seu ponto de entrada React
-      name: 'MyWidget',              // <- nome global (pode ser qualquer um)
-      fileName: 'widget.bundle',     // <- resultado será dist/widget.bundle.js
-      formats: ['iife'],             // <- necessário para uso via <script>
+      entry: 'src/main.tsx',
+      name: 'MyWidget',
+      fileName: 'widget.bundle',
+      formats: ['iife'],
     },
     rollupOptions: {
       output: {
@@ -28,5 +31,5 @@ export default defineConfig({
     hmr: {
       clientPort: 5004
     }
-  }
+  }  
 });
