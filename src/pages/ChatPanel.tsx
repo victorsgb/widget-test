@@ -77,8 +77,8 @@ function ChatPanel() {
   };
 
   const chatBox = (
-    <Box sx={{ p: 2, maxHeight: 500, overflow: 'auto' }}>
-      <Stack spacing={1} sx={{ mb: 3 }}>
+    <Box sx={{ paddingLeft: 2, paddingRight: 2 }}>
+      <Stack spacing={1} sx={{ mb: 3, maxHeight: '200px', overflowY: 'auto' }}>
         {contextMessages.map((message) => {
           const isUser = message.type === 'user';
           const isSystem = message.type === 'system';
@@ -206,6 +206,7 @@ function ChatPanel() {
           position: 'fixed',
           bottom: 20,
           right: 20,
+          zIndex: 9999,
           width: 40,
           height: 40,
           bgcolor: '#fbc',
@@ -215,7 +216,6 @@ function ChatPanel() {
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          zIndex: 1300
         }}
       >
         <TawkeeLogo />
@@ -249,7 +249,7 @@ function ChatPanel() {
                 <Typography variant="h6">Chat with one of our Agents!</Typography>
               </Box>
 
-              <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
+              <Box sx={{ p: 2, flexGrow: 1, overflowY: 'hidden' }}>
                 {!submitted ? (
                   <>
                     <Typography variant="body2" sx={{ mb: 1 }}>
