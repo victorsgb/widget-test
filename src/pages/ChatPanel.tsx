@@ -197,7 +197,8 @@ function ChatPanel() {
                 flexDirection: 'column',
                 borderRadius: 2,
                 overflow: 'hidden',
-                backgroundColor: 'black'
+                backgroundColor: 'black',
+                color: 'white'
               }}
             >
               <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
