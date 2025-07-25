@@ -175,7 +175,8 @@ function ChatPanel() {
       >
         <TawkeeLogo />
       </Box>
-      {/* Chat Dialog */}
+
+      {/* Chat Dialog - Renderiza apenas se aberto */}
       {chatOpen && (
         <ClickAwayListener onClickAway={() => setChatOpen(false)}>
           <Box
@@ -183,7 +184,8 @@ function ChatPanel() {
               position: 'fixed',
               bottom: 90,
               right: 20,
-              zIndex: 1300
+              zIndex: 1300,
+              display: 'block'
             }}
           >
             <Paper
@@ -245,10 +247,9 @@ function ChatPanel() {
           </Box>
         </ClickAwayListener>
       )}
-
-
     </>
   );
+
 }
 
 export default ChatPanel;
