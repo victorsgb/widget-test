@@ -1,5 +1,6 @@
 import { Box, Typography, keyframes } from '@mui/material';
 import { formatDateTime } from '../utils/formatDateTime';
+import { useTheme } from '@mui/material';
 
 // Keyframes for animated dots
 const blink = keyframes`
@@ -27,13 +28,16 @@ function TypingIndicator({
   type: 'user' | 'assistant' | 'system';
   name: string;
 }) {
+
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
         width: 'fit-content',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-end',
+        alignItems: type === 'user' ? 'flex-start' : 'flex-end',
         animation: `${fadeInUp} 300ms ease-out`,
       }}
     >
@@ -43,10 +47,9 @@ function TypingIndicator({
           padding: '8px 16px',
           borderRadius: '16px',
           marginBottom: '4px',
-          backgroundColor:
-            type === 'user' ? '#fbc' : '#222', // azul para user, cinza claro para assistant/system
-          color: 
-            type === 'user' ? '#222' : '#fff',
+          backgroundColor: type === 'user'
+            ? theme.palette.primary.main
+            : theme.palette.grey[100],
           wordBreak: 'initial',
           textAlign: 'left',
         }}
@@ -67,7 +70,7 @@ function TypingIndicator({
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: '#666666',
+                backgroundColor: type === 'user' ? 'white' : theme.palette.text.primary,
                 animation: `${blink} 1.4s infinite`,
                 animationDelay: `${i * 0.2}s`,
               }}
@@ -76,10 +79,10 @@ function TypingIndicator({
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ display: 'flex', flexDirection: type === 'user' ? 'row' : 'row-reverse', gap: 1 }}>
         <Typography
           variant="caption"
-          sx={{ px: 1, color: '#666666' }}
+          sx={{ px: 1 }}
         >
           {name}
         </Typography>
