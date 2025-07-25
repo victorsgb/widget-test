@@ -1,5 +1,5 @@
-import { Box, Typography, useTheme, keyframes } from '@mui/material';
-import { formatDateTime } from '../utils/formatDateTime'; // adjust path as needed
+import { Box, Typography, keyframes } from '@mui/material';
+import { formatDateTime } from '../utils/formatDateTime';
 
 // Keyframes for animated dots
 const blink = keyframes`
@@ -20,9 +20,13 @@ const fadeInUp = keyframes`
   }
 `;
 
-function TypingIndicator({ type, name }: {type: 'user' | 'assistant' | 'system', name: string}) {
-  const theme = useTheme();
-
+function TypingIndicator({
+  type,
+  name,
+}: {
+  type: 'user' | 'assistant' | 'system';
+  name: string;
+}) {
   return (
     <Box
       sx={{
@@ -36,13 +40,13 @@ function TypingIndicator({ type, name }: {type: 'user' | 'assistant' | 'system',
       <Box
         sx={{
           maxWidth: '350px',
-          padding: theme.spacing(1, 2),
-          borderRadius: theme.spacing(2),
-          marginBottom: 0.5,
-          backgroundColor: type === 'user'
-            ? theme.palette.primary.main
-            : theme.palette.grey[100],
-          color: theme.palette.text.secondary,
+          padding: '8px 16px',
+          borderRadius: '16px',
+          marginBottom: '4px',
+          backgroundColor:
+            type === 'user' ? '#fbc' : '#222', // azul para user, cinza claro para assistant/system
+          color: 
+            type === 'user' ? '#222' : '#fff',
           wordBreak: 'initial',
           textAlign: 'left',
         }}
@@ -63,7 +67,7 @@ function TypingIndicator({ type, name }: {type: 'user' | 'assistant' | 'system',
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: theme.palette.text.secondary,
+                backgroundColor: '#666666',
                 animation: `${blink} 1.4s infinite`,
                 animationDelay: `${i * 0.2}s`,
               }}
@@ -73,10 +77,16 @@ function TypingIndicator({ type, name }: {type: 'user' | 'assistant' | 'system',
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{ px: 1, color: '#666666' }}
+        >
           {name}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ px: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{ px: 1, color: '#666666' }}
+        >
           {formatDateTime(Date.now()).time}
         </Typography>
       </Box>
