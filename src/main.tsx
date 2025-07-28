@@ -16,9 +16,16 @@ if (!mountNode) {
 const currentScript = document.currentScript as HTMLScriptElement | null;
 const agentId = currentScript?.dataset.agentId;
 const workspaceId = currentScript?.dataset.workspaceId;
+const agentSecret = currentScript?.dataset.agentSecret;
+const outlineColor = currentScript?.dataset.outlineColor;
 
 ReactDOM.createRoot(mountNode).render(
   <StrictMode>
-    <App agentId={agentId} workspaceId={workspaceId} />
+    <App
+      agentId={agentId}
+      workspaceId={workspaceId}
+      agentSecret={agentSecret}
+      outlineColor={outlineColor}
+    />
   </StrictMode>
 );

@@ -30,9 +30,16 @@ import ColorModeIconDropdown from '../components/shared-theme/ColorModeIconDropd
 interface ChatPanelProps {
   agentId?: string;
   workspaceId?: string;
+  agentSecret?: string;
+  outlineColor?: string;
 }
 
-function ChatPanel({ agentId, workspaceId }: ChatPanelProps) {
+function ChatPanel({
+  agentId,
+  workspaceId,
+  agentSecret,
+  outlineColor,
+}: ChatPanelProps) {
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (systemMode || mode) as 'light' | 'dark';
@@ -234,6 +241,8 @@ function ChatPanel({ agentId, workspaceId }: ChatPanelProps) {
     </Box>
   );
 
+  console.log({ agentSecret });
+
   return (
     <>
       <Box
@@ -249,7 +258,7 @@ function ChatPanel({ agentId, workspaceId }: ChatPanelProps) {
             resolvedMode === 'dark'
               ? theme.palette.primary.main
               : theme.palette.primary.light,
-          color: '#fff',
+          color: outlineColor || '#fff',
           borderRadius: 1.5,
           display: 'flex',
           alignItems: 'center',
@@ -258,7 +267,11 @@ function ChatPanel({ agentId, workspaceId }: ChatPanelProps) {
         }}
       >
         {workspaceId && workspaceAvatarUrl ? (
-          <img src={workspaceAvatarUrl} alt="Workspace Logo" />
+          <img
+            src={workspaceAvatarUrl}
+            alt="Workspace Logo"
+            style={{ width: 32, height: 32 }}
+          />
         ) : (
           <TawkeeLogo />
         )}

@@ -5,13 +5,25 @@ import ChatPanel from './pages/ChatPanel';
 interface AppProps {
   agentId?: string;
   workspaceId?: string;
+  agentSecret?: string;
+  outlineColor?: string;
 }
 
-export default function App({ agentId, workspaceId }: AppProps) {
+export default function App({
+  agentId,
+  workspaceId,
+  agentSecret,
+  outlineColor,
+}: AppProps) {
   return (
     <SocketProvider>
       <AppPageLayout>
-        <ChatPanel agentId={agentId} workspaceId={workspaceId} />
+        <ChatPanel
+          agentId={agentId}
+          workspaceId={workspaceId}
+          agentSecret={agentSecret}
+          outlineColor={outlineColor}
+        />
       </AppPageLayout>
     </SocketProvider>
   );
