@@ -256,9 +256,8 @@ function ChatPanel({
           height: 40,
           bgcolor:
             resolvedMode === 'dark'
-              ? theme.palette.primary.main
-              : theme.palette.primary.light,
-          color: outlineColor || '#fff',
+              ? outlineColor || theme.palette.primary.main
+              : outlineColor || theme.palette.primary.light,
           borderRadius: 1.5,
           display: 'flex',
           alignItems: 'center',
