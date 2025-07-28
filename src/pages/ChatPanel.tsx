@@ -12,13 +12,10 @@ import {
   Button,
   Divider,
   useTheme,
-  useColorScheme
+  useColorScheme,
 } from '@mui/material';
 
-import {
-  Person as PersonIcon,
-  SmartToy as BotIcon
-} from '@mui/icons-material';
+import { Person as PersonIcon, SmartToy as BotIcon } from '@mui/icons-material';
 
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import SendIcon from '@mui/icons-material/Send';
@@ -32,15 +29,20 @@ import ColorModeIconDropdown from '../components/shared-theme/ColorModeIconDropd
 
 interface ChatPanelProps {
   agentId?: string;
-  agentSecret?: string;
+  workspaceId?: string;
 }
 
-function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
+function ChatPanel({ agentId, workspaceId }: ChatPanelProps) {
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
-  const resolvedMode = (systemMode || mode) as 'light' | 'dark';  
+  const resolvedMode = (systemMode || mode) as 'light' | 'dark';
 
-  const { startContextChat, stopContextChat, contextMessages, whoIsTyping } = useSocket();
+  const [workspaceAvatarUrl, setWorkspaceAvatarUrl] = useState<
+    string | undefined
+  >(undefined);
+
+  const { startContextChat, stopContextChat, contextMessages, whoIsTyping } =
+    useSocket();
 
   const [contextId, setContextId] = useState<string>('');
   const [chatOpen, setChatOpen] = useState(false);
@@ -95,7 +97,33 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
     setContextId(newContextId);
     setSubmitted(true);
     startContextChat(newContextId);
-  }
+  };
+
+  useEffect(() => {
+    async function fetchWorkspaceAvatar(workspaceId: string) {
+      try {
+        const response = await fetch(
+          `${env.API_URL}/workspaces/${workspaceId}/avatar`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'admin-api-key': env.ADMIN_API_KEY,
+            },
+          }
+        );
+
+        const data: any = response.json();
+        setWorkspaceAvatarUrl(data.data.avatar);
+      } catch (error) {
+        console.error('Error fetching workspace avatar:', error);
+      }
+    }
+
+    if (workspaceId) {
+      fetchWorkspaceAvatar(workspaceId);
+    }
+  }, []);
 
   useEffect(() => {
     return () => stopContextChat();
@@ -111,49 +139,73 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
 
           return (
             <Box key={message.createdAt}>
-              { !isSystem && (
-                <Box sx={{ display: 'flex', flexDirection: isUser ? 'row' : 'row-reverse', gap: 1 }}>
+              {!isSystem && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: isUser ? 'row' : 'row-reverse',
+                    gap: 1,
+                  }}
+                >
                   <Avatar>{isUser ? <PersonIcon /> : <BotIcon />}</Avatar>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ 
-                      backgroundColor:
-                        isUser
+                    <Box
+                      sx={{
+                        backgroundColor: isUser
                           ? theme.palette.primary.main
                           : theme.palette.grey[100],
-                      color:
-                        isUser
-                          ? '#fff'
-                          : theme.palette.text.primary,                   
-                      padding: 1.5,
-                      borderRadius: 2
-                    }}>
+                        color: isUser ? '#fff' : theme.palette.text.primary,
+                        padding: 1.5,
+                        borderRadius: 2,
+                      }}
+                    >
                       <Typography variant="body2">{message.message}</Typography>
                     </Box>
 
-                    <Box sx={{ display: 'flex', flexDirection: isUser ? 'row' : 'row-reverse', gap: 1 }}>
-                      <Typography variant="caption" color='textPrimary'>{message.name}</Typography>
-                      <Typography variant="caption" color='textSecondary'>{time}</Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: isUser ? 'row' : 'row-reverse',
+                        gap: 1,
+                      }}
+                    >
+                      <Typography variant="caption" color="textPrimary">
+                        {message.name}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {time}
+                      </Typography>
                     </Box>
                   </Box>
-                </Box>               
+                </Box>
               )}
             </Box>
           );
         })}
         {whoIsTyping && (
-          <Box sx={{ display: 'flex', flexDirection: whoIsTyping.type === 'user' ? 'row' : 'row-reverse', gap: 1 }}>
-            <Avatar>{whoIsTyping.type === 'user' ? <PersonIcon /> : <BotIcon />}</Avatar>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection:
+                whoIsTyping.type === 'user' ? 'row' : 'row-reverse',
+              gap: 1,
+            }}
+          >
+            <Avatar>
+              {whoIsTyping.type === 'user' ? <PersonIcon /> : <BotIcon />}
+            </Avatar>
             <Box>
-              <TypingIndicator type={whoIsTyping.type} name={whoIsTyping.name} />
+              <TypingIndicator
+                type={whoIsTyping.type}
+                name={whoIsTyping.name}
+              />
             </Box>
           </Box>
         )}
       </Stack>
-      <Paper variant='highlighted'>
-        {sending && (
-          <LinearProgress color='secondary' />
-        )}
-        {error && <Typography color='warning'>{error}</Typography>}
+      <Paper variant="highlighted">
+        {sending && <LinearProgress color="secondary" />}
+        {error && <Typography color="warning">{error}</Typography>}
         <Box sx={{ display: 'flex', gap: 1, p: 1, alignItems: 'center' }}>
           <TextField
             label="Type a message"
@@ -182,9 +234,6 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
     </Box>
   );
 
-  console.log("chatPanel renderizado com sucesso!");
-  console.log(`${agentId} ${agentSecret}`);
-
   return (
     <>
       <Box
@@ -196,7 +245,10 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
           zIndex: 9999,
           width: 40,
           height: 40,
-          bgcolor: resolvedMode === 'dark' ? theme.palette.primary.main : theme.palette.primary.light,
+          bgcolor:
+            resolvedMode === 'dark'
+              ? theme.palette.primary.main
+              : theme.palette.primary.light,
           color: '#fff',
           borderRadius: 1.5,
           display: 'flex',
@@ -205,7 +257,11 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
           cursor: 'pointer',
         }}
       >
-        <TawkeeLogo />
+        {workspaceId && workspaceAvatarUrl ? (
+          <img src={workspaceAvatarUrl} alt="Workspace Logo" />
+        ) : (
+          <TawkeeLogo />
+        )}
       </Box>
 
       {chatOpen && (
@@ -216,7 +272,7 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
               bottom: 90,
               right: 20,
               zIndex: 1300,
-              display: 'block'
+              display: 'block',
             }}
           >
             <Paper
@@ -227,11 +283,20 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 2,
-                overflow: 'hidden'                         
+                overflow: 'hidden',
               }}
             >
-              <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6">Chat with our agents!</Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography variant="h6">
+                  {agentId ? 'Chat with us!' : 'Chat with our agents!'}
+                </Typography>
                 <ColorModeIconDropdown />
               </Box>
 
@@ -247,18 +312,22 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
                       label="Name"
                       variant="standard"
                       value={userInfo.name}
-                      onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                      onChange={(e) =>
+                        setUserInfo({ ...userInfo, name: e.target.value })
+                      }
                       fullWidth
                       placeholder="Enter your name"
                       sx={{ mb: 1 }}
                     />
                     <TextField
                       label="Contact info"
-                      variant='standard'
+                      variant="standard"
                       value={userInfo.email}
-                      onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                      onChange={(e) =>
+                        setUserInfo({ ...userInfo, email: e.target.value })
+                      }
                       fullWidth
-                      placeholder="Enter your email or phone number"                 
+                      placeholder="Enter your email or phone number"
                     />
                   </>
                 ) : (
@@ -278,10 +347,7 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
                     Start Chat
                   </Button>
                 ) : (
-                  <Button
-                    variant='text'
-                    onClick={() => setChatOpen(false)}                 
-                  >
+                  <Button variant="text" onClick={() => setChatOpen(false)}>
                     Close
                   </Button>
                 )}

@@ -28,7 +28,6 @@ function TypingIndicator({
   type: 'user' | 'assistant' | 'system';
   name: string;
 }) {
-
   const theme = useTheme();
 
   return (
@@ -47,9 +46,10 @@ function TypingIndicator({
           padding: '8px 16px',
           borderRadius: '16px',
           marginBottom: '4px',
-          backgroundColor: type === 'user'
-            ? theme.palette.primary.main
-            : theme.palette.grey[100],
+          backgroundColor:
+            type === 'user'
+              ? theme.palette.primary.main
+              : theme.palette.grey[100],
           wordBreak: 'initial',
           textAlign: 'left',
         }}
@@ -70,7 +70,8 @@ function TypingIndicator({
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: type === 'user' ? 'white' : theme.palette.text.primary,
+                backgroundColor:
+                  type === 'user' ? 'white' : theme.palette.text.primary,
                 animation: `${blink} 1.4s infinite`,
                 animationDelay: `${i * 0.2}s`,
               }}
@@ -79,17 +80,17 @@ function TypingIndicator({
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: type === 'user' ? 'row' : 'row-reverse', gap: 1 }}>
-        <Typography
-          variant="caption"
-          sx={{ px: 1 }}
-        >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: type === 'user' ? 'row' : 'row-reverse',
+          gap: 1,
+        }}
+      >
+        <Typography variant="caption" sx={{ px: 1 }}>
           {name}
         </Typography>
-        <Typography
-          variant="caption"
-          sx={{ px: 1, color: '#666666' }}
-        >
+        <Typography variant="caption" sx={{ px: 1, color: '#666666' }}>
           {formatDateTime(Date.now()).time}
         </Typography>
       </Box>

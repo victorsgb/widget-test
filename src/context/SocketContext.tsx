@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useRef,
-  ReactNode,
-  useContext,
-  useState,
-} from 'react';
+import { createContext, useRef, ReactNode, useContext, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import env from '../config/env';
 
@@ -19,7 +13,9 @@ export interface MessageContextChatUpdatePayload {
 interface SocketContextType {
   startContextChat: (contextId: string) => void;
   stopContextChat: () => void;
-  whoIsTyping: {type: 'user' | 'assistant' | 'system', name: string} | undefined;
+  whoIsTyping:
+    | { type: 'user' | 'assistant' | 'system'; name: string }
+    | undefined;
   contextMessages: MessageContextChatUpdatePayload[];
 }
 
@@ -35,12 +31,17 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
   const socketPublicRef = useRef<Socket | null>(null);
 
-  const [whoIsTyping, setWhoIsTyping] = useState<{type: 'user' | 'assistant' | 'system', name: string} | undefined>(undefined);
+  const [whoIsTyping, setWhoIsTyping] = useState<
+    { type: 'user' | 'assistant' | 'system'; name: string } | undefined
+  >(undefined);
   const [contextMessages, setContextMessages] = useState<
     MessageContextChatUpdatePayload[]
   >([]);
 
-  const handleStartTypingChatUpdate = (data: { type: 'user' | 'assistant' | 'system', name: string }) => {
+  const handleStartTypingChatUpdate = (data: {
+    type: 'user' | 'assistant' | 'system';
+    name: string;
+  }) => {
     setWhoIsTyping(data);
   };
 
@@ -51,7 +52,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const handleMessageContextChatUpdate = (
     data: MessageContextChatUpdatePayload
   ) => {
-    setContextMessages((prev) => [...prev, {...data, createdAt: Date.now()}]);
+    setContextMessages((prev) => [...prev, { ...data, createdAt: Date.now() }]);
     setWhoIsTyping(undefined);
   };
 

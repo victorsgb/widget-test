@@ -15,10 +15,10 @@ if (!mountNode) {
 // Lê os atributos do script que carregou o widget
 const currentScript = document.currentScript as HTMLScriptElement | null;
 const agentId = currentScript?.dataset.agentId;
-const agentSecret = currentScript?.dataset.agentSecret;
+const workspaceId = currentScript?.dataset.workspaceId;
 
 ReactDOM.createRoot(mountNode).render(
   <StrictMode>
-    <App agentId={agentId} agentSecret={agentSecret} />
+    <App agentId={agentId} workspaceId={workspaceId} />
   </StrictMode>
 );
