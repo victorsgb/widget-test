@@ -182,6 +182,9 @@ function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
     </Box>
   );
 
+  console.log("chatPanel renderizado com sucesso!");
+  console.log(`${agentId} ${agentSecret}`);
+
   return (
     <>
       <Box
