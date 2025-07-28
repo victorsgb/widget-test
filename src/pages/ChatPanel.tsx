@@ -106,31 +106,37 @@ function ChatPanel({
     startContextChat(newContextId);
   };
 
-  useEffect(() => {
-    async function fetchWorkspaceAvatar(workspaceId: string) {
-      try {
-        const response = await fetch(
-          `${env.API_URL}/workspaces/${workspaceId}/avatar`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'admin-api-key': env.ADMIN_API_KEY,
-            },
-          }
-        );
+useEffect(() => {
+  async function fetchWorkspaceAvatar(workspaceId: string) {
+    try {
+      const response = await fetch(
+        `${env.API_URL}/workspaces/${workspaceId}/avatar`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'admin-api-key': env.ADMIN_API_KEY,
+          },
+        }
+      );
 
-        const data = await response.json();
-        setWorkspaceAvatarUrl(data.data.avatar);
-      } catch (error) {
-        console.error('Error fetching workspace avatar:', error);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch avatar: ${response.status}`);
       }
-    }
 
-    if (workspaceId) {
-      fetchWorkspaceAvatar(workspaceId);
+      const data: { avatar: string } = await response.json();
+      setWorkspaceAvatarUrl(data.avatar);
+
+    } catch (error) {
+      console.error('Error fetching workspace avatar:', error);
     }
-  }, []);
+  }
+
+  if (workspaceId) {
+    fetchWorkspaceAvatar(workspaceId);
+  }
+}, [workspaceId]);
+
 
   useEffect(() => {
     return () => stopContextChat();
