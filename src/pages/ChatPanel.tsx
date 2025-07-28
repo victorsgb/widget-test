@@ -109,6 +109,7 @@ function ChatPanel({
 useEffect(() => {
   async function fetchWorkspaceAvatar(workspaceId: string) {
     try {
+      console.log(`GET ${env.API_URL}/workspaces/${workspaceId}/avatar...`)
       const response = await fetch(
         `${env.API_URL}/workspaces/${workspaceId}/avatar`,
         {
@@ -121,6 +122,8 @@ useEffect(() => {
       );
 
       if (!response.ok) {
+        const text = await response.text();
+        console.error('Non-OK response body:', text);
         throw new Error(`Failed to fetch avatar: ${response.status}`);
       }
 
