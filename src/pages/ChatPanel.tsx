@@ -120,7 +120,7 @@ function ChatPanel({
           }
         );
 
-        const data: any = response.json();
+        const data = await response.json();
         setWorkspaceAvatarUrl(data.data.avatar);
       } catch (error) {
         console.error('Error fetching workspace avatar:', error);
