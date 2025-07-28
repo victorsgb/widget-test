@@ -2,11 +2,16 @@ import AppPageLayout from './components/AppPageLayout';
 import { SocketProvider } from './context/SocketContext';
 import ChatPanel from './pages/ChatPanel';
 
-export default function App() {
+interface AppProps {
+  agentId?: string;
+  agentSecret?: string;
+}
+
+export default function App({ agentId, agentSecret }: AppProps) {
   return (
     <SocketProvider>
       <AppPageLayout>
-        <ChatPanel />
+        <ChatPanel agentId={agentId} agentSecret={agentSecret} />
       </AppPageLayout>
     </SocketProvider>
   );

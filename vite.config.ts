@@ -11,7 +11,7 @@ export default defineConfig({
     emptyOutDir: true,
     lib: {
       entry: 'src/main.tsx',
-      name: 'MyWidget',
+      name: 'TawkeeWidget',
       fileName: 'widget.bundle',
       formats: ['iife'],
     },

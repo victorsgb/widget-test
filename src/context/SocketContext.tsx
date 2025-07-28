@@ -57,8 +57,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
   const startContextChat = (contextId: string) => {
     stopContextChat();
-
-    console.log('Connecting to contextId ', contextId);
     socketPublicRef.current = io(SOCKET_SERVER_URL, {
       auth: { contextId },
       transports: ['websocket'],
@@ -80,7 +78,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
   const stopContextChat = () => {
     if (socketPublicRef.current) {
-      console.log('Disconnecting from contextId...');
       socketPublicRef.current.off(
         'startTypingChatUpdate',
         handleStartTypingChatUpdate

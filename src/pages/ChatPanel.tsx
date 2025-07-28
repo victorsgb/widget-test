@@ -30,7 +30,12 @@ import env from '../config/env';
 import TawkeeLogo from '../components/TawkeeLogo';
 import ColorModeIconDropdown from '../components/shared-theme/ColorModeIconDropdown';
 
-function ChatPanel() {
+interface ChatPanelProps {
+  agentId?: string;
+  agentSecret?: string;
+}
+
+function ChatPanel({ agentId, agentSecret }: ChatPanelProps) {
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (systemMode || mode) as 'light' | 'dark';  
@@ -45,13 +50,6 @@ function ChatPanel() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const id = crypto.randomUUID();
-    setContextId(id);
-    startContextChat(id);
-    return () => stopContextChat();
-  }, []);
-
   const handleSendMessage = async (message: string) => {
     if (!message.trim()) return;
     setSending(true);
@@ -64,7 +62,12 @@ function ChatPanel() {
         chatName: userInfo.name,
         phone: userInfo.email,
       };
-      const response = await fetch(`${env.API_URL}/agent/conversation`, {
+
+      const url = agentId
+        ? `${env.API_URL}/agent/${agentId}/conversation`
+        : `${env.API_URL}/agent/conversation`;
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,6 +86,20 @@ function ChatPanel() {
       setSending(false);
     }
   };
+
+  const handleStartChat = async () => {
+    if (!userInfo.name || !userInfo.email) return;
+
+    const newContextId = crypto.randomUUID();
+
+    setContextId(newContextId);
+    setSubmitted(true);
+    startContextChat(newContextId);
+  }
+
+  useEffect(() => {
+    return () => stopContextChat();
+  }, []);
 
   const chatBox = (
     <Box sx={{ paddingLeft: 2, paddingRight: 2 }}>
@@ -201,7 +218,6 @@ function ChatPanel() {
           >
             <Paper
               variant="outlined"
-              elevation={6}
               sx={{
                 width: 360,
                 maxHeight: '80vh',
@@ -253,9 +269,7 @@ function ChatPanel() {
                 {!submitted ? (
                   <Button
                     variant="outlined"
-                    onClick={() => {
-                      if (userInfo.name && userInfo.email) setSubmitted(true);
-                    }}
+                    onClick={handleStartChat}
                     disabled={!userInfo.name || !userInfo.email}
                   >
                     Start Chat

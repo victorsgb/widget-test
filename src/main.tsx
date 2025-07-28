@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom/client';
 import App from './App';
 
 // Cria dinamicamente o contêiner onde o widget será montado
-const mountId = 'my-widget-container';
+const mountId = 'tawkee-widget-container';
 let mountNode = document.getElementById(mountId);
 
 if (!mountNode) {
@@ -12,8 +12,13 @@ if (!mountNode) {
   document.body.appendChild(mountNode);
 }
 
+// Lê os atributos do script que carregou o widget
+const currentScript = document.currentScript as HTMLScriptElement | null;
+const agentId = currentScript?.dataset.agentId;
+const agentSecret = currentScript?.dataset.agentSecret;
+
 ReactDOM.createRoot(mountNode).render(
   <StrictMode>
-    <App />
+    <App agentId={agentId} agentSecret={agentSecret} />
   </StrictMode>
 );
