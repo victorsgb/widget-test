@@ -142,7 +142,7 @@ function ChatPanel({
         setIsValidSecret(false);
         return;
       }
-
+     
       try {
         const response = await fetch(
           `${env.API_URL}/workspaces/${workspaceId}/agents/${agentId}/check-secret`,
@@ -162,9 +162,8 @@ function ChatPanel({
         }
 
         const result = await response.json();
-        setIsValidSecret(result === true);
+        setIsValidSecret(result.data);
       } catch (error) {
-        console.error('Secret validation failed:', error);
         setIsValidSecret(false);
       }
     }
