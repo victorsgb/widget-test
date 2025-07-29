@@ -14,18 +14,22 @@ if (!mountNode) {
 
 // Lê os atributos do script que carregou o widget
 const currentScript = document.currentScript as HTMLScriptElement | null;
+const token = currentScript?.dataset.token;
 const agentId = currentScript?.dataset.agentId;
 const workspaceId = currentScript?.dataset.workspaceId;
 const agentSecret = currentScript?.dataset.agentSecret;
-const outlineColor = currentScript?.dataset.outlineColor;
+const outlineColorDark = currentScript?.dataset.outlineColorDark;
+const outlineColorLight = currentScript?.dataset.outlineColorLight;
 
 ReactDOM.createRoot(mountNode).render(
   <StrictMode>
     <App
+      token={token}
       agentId={agentId}
       workspaceId={workspaceId}
       agentSecret={agentSecret}
-      outlineColor={outlineColor}
+      outlineColorDark={outlineColorDark}
+      outlineColorLight={outlineColorLight}
     />
   </StrictMode>
 );

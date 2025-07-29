@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   Box,
@@ -27,19 +27,29 @@ import env from '../config/env';
 import TawkeeLogo from '../components/TawkeeLogo';
 import ColorModeIconDropdown from '../components/shared-theme/ColorModeIconDropdown';
 
+interface User {
+  name: string;
+  email: string;
+}
+
 interface ChatPanelProps {
+  token?: string;
   agentId?: string;
   workspaceId?: string;
   agentSecret?: string;
-  outlineColor?: string;
+  outlineColorDark?: string;
+  outlineColorLight?: string;
 }
 
 function ChatPanel({
+  token,
   agentId,
   workspaceId,
   agentSecret,
-  outlineColor,
+  outlineColorDark,
+  outlineColorLight
 }: ChatPanelProps) {
+ 
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (systemMode || mode) as 'light' | 'dark';
@@ -50,6 +60,10 @@ function ChatPanel({
 
   const { startContextChat, stopContextChat, contextMessages, whoIsTyping } =
     useSocket();
+  
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [isValidSecret, setIsValidSecret] = useState<boolean>(true);
 
   const [contextId, setContextId] = useState<string>('');
   const [chatOpen, setChatOpen] = useState(false);
@@ -84,15 +98,22 @@ function ChatPanel({
         },
         body: JSON.stringify(body),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw errorData.error || 'Failure to send message';
-      }
+      }     
       setNewMessage('');
+      
     } catch (err: any) {
       setError(err);
     } finally {
       setSending(false);
+
+      // Focus the text input after the next render cycle
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);    
     }
   };
 
@@ -104,46 +125,119 @@ function ChatPanel({
     setContextId(newContextId);
     setSubmitted(true);
     startContextChat(newContextId);
+ 
+    // Focus the text input after the next render cycle
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);    
   };
-
-useEffect(() => {
-  async function fetchWorkspaceAvatar(workspaceId: string) {
-    try {
-      console.log(`GET ${env.API_URL}/workspaces/${workspaceId}/avatar...`)
-      const response = await fetch(
-        `${env.API_URL}/workspaces/${workspaceId}/avatar`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'admin-api-key': env.ADMIN_API_KEY,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Non-OK response body:', text);
-        throw new Error(`Failed to fetch avatar: ${response.status}`);
-      }
-
-      const data: { avatar: string } = await response.json();
-      setWorkspaceAvatarUrl(data.avatar);
-
-    } catch (error) {
-      console.error('Error fetching workspace avatar:', error);
-    }
-  }
-
-  if (workspaceId) {
-    fetchWorkspaceAvatar(workspaceId);
-  }
-}, [workspaceId]);
-
 
   useEffect(() => {
     return () => stopContextChat();
   }, []);
+
+  useEffect(() => {
+    async function validateSecret() {
+      if (!agentId || !agentSecret) {
+        setIsValidSecret(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${env.API_URL}/workspaces/${workspaceId}/agents/${agentId}/check-secret`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'admin-api-key': env.ADMIN_API_KEY,
+            },
+            body: JSON.stringify({ secret: agentSecret }),
+          }
+        );
+
+        if (!response.ok) {
+          setIsValidSecret(false);
+          return;
+        }
+
+        const result = await response.json();
+        setIsValidSecret(result === true);
+      } catch (error) {
+        console.error('Secret validation failed:', error);
+        setIsValidSecret(false);
+      }
+    }
+
+    if (workspaceId) validateSecret();
+  }, [agentId, workspaceId, agentSecret]);
+
+  useEffect(() => {
+    async function fetchWorkspaceAvatar(workspaceId: string) {
+      try {
+        const response = await fetch(
+          `${env.API_URL}/workspaces/${workspaceId}/avatar`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'admin-api-key': env.ADMIN_API_KEY,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Non-OK response body:', text);
+          throw new Error(`Failed to fetch avatar: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setWorkspaceAvatarUrl(data.data.avatar);
+
+      } catch (error) {
+        console.error('Error fetching workspace avatar:', error);
+      }
+    }
+
+    if (workspaceId) {
+      fetchWorkspaceAvatar(workspaceId);
+    }
+  }, [workspaceId]);
+
+  useEffect(() => {
+    async function fetchUserProfile(token: string) {
+      try {
+        const response = await fetch(`${env.API_URL}/auth/profile`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        const userData: User = data.data;
+
+        setUserInfo((prev) => ({
+          ...prev,
+          name: userData.name || '',
+          email: userData.email || '',
+        }));
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+      }
+    }
+
+    if (token) {
+      fetchUserProfile(token);
+    }
+  }, [token]);
 
   const chatBox = (
     <Box sx={{ paddingLeft: 2, paddingRight: 2 }}>
@@ -224,12 +318,13 @@ useEffect(() => {
         {error && <Typography color="warning">{error}</Typography>}
         <Box sx={{ display: 'flex', gap: 1, p: 1, alignItems: 'center' }}>
           <TextField
+            inputRef={inputRef}
             label="Type a message"
             variant="standard"
             fullWidth
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={(e) => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSendMessage(newMessage);
@@ -250,12 +345,17 @@ useEffect(() => {
     </Box>
   );
 
-  console.log({ agentSecret });
+  if (isValidSecret === false) return;
 
   return (
     <>
       <Box
         onClick={() => setChatOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            setChatOpen(true);
+          }
+        }}
         sx={{
           position: 'fixed',
           bottom: 20,
@@ -265,20 +365,36 @@ useEffect(() => {
           height: 40,
           bgcolor:
             resolvedMode === 'dark'
-              ? outlineColor || theme.palette.primary.main
-              : outlineColor || theme.palette.primary.light,
+              ? outlineColorDark || theme.palette.primary.main
+              : outlineColorLight || theme.palette.primary.light,
           borderRadius: 1.5,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
+          caretColor: 'transparent',
+          outline: 'none',
+          transition: 'box-shadow 0.2s ease-in-out',
+
+          '&:hover': {
+            boxShadow: 6, // Equivalent to theme.shadows[6]
+          },
+          '&:focus': {
+            boxShadow: 6,
+          },
         }}
       >
-        {workspaceId && workspaceAvatarUrl ? (
-          <img
+        { workspaceId && workspaceAvatarUrl ? (
+          <Box
+            component="img"
             src={workspaceAvatarUrl}
             alt="Workspace Logo"
-            style={{ width: 32, height: 32 }}
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: 1,
+            }}
+            tabIndex={0}
           />
         ) : (
           <TawkeeLogo />
@@ -327,7 +443,10 @@ useEffect(() => {
                 {!submitted ? (
                   <>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      To start, please fill in the information below:
+                      { token
+                        ? 'You will be identified as follows:'
+                        : 'To start, please fill in the information below:'
+                      }
                     </Typography>
                     <TextField
                       label="Name"
@@ -338,6 +457,7 @@ useEffect(() => {
                       }
                       fullWidth
                       placeholder="Enter your name"
+                      disabled={!!token}
                       sx={{ mb: 1 }}
                     />
                     <TextField
@@ -349,6 +469,7 @@ useEffect(() => {
                       }
                       fullWidth
                       placeholder="Enter your email or phone number"
+                      disabled={!!token}
                     />
                   </>
                 ) : (
