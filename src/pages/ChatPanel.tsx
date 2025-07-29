@@ -90,6 +90,9 @@ function ChatPanel({
         ? `${env.API_URL}/agent/${agentId}/conversation`
         : `${env.API_URL}/agent/conversation`;
 
+      console.log('Sending message:', body);
+      console.log('Sending to:', url);
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -99,10 +102,13 @@ function ChatPanel({
         body: JSON.stringify(body),
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Error sending message:', errorData);
         throw errorData.error || 'Failure to send message';
-      }     
+      }   
       setNewMessage('');
       
     } catch (err: any) {
@@ -144,6 +150,11 @@ function ChatPanel({
       }
      
       try {
+        console.log('Validating secret with:', {
+          url: `${env.API_URL}/workspaces/${workspaceId}/agents/${agentId}/check-secret`,
+          secret: agentSecret,
+        });
+
         const response = await fetch(
           `${env.API_URL}/workspaces/${workspaceId}/agents/${agentId}/check-secret`,
           {
@@ -156,12 +167,17 @@ function ChatPanel({
           }
         );
 
+        console.log('Secret validation response status:', response.status);
+
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Secret validation error body:', errorText);          
           setIsValidSecret(false);
           return;
         }
 
         const result = await response.json();
+        console.log('Secret validation result:', result);
         setIsValidSecret(result.data);
       } catch (error) {
         setIsValidSecret(false);
@@ -174,6 +190,7 @@ function ChatPanel({
   useEffect(() => {
     async function fetchWorkspaceAvatar(workspaceId: string) {
       try {
+        console.log('Fetching workspace avatar for:', workspaceId);
         const response = await fetch(
           `${env.API_URL}/workspaces/${workspaceId}/avatar`,
           {
@@ -185,13 +202,16 @@ function ChatPanel({
           }
         );
 
+        console.log('Avatar fetch response status:', response.status);
+
         if (!response.ok) {
           const text = await response.text();
-          console.error('Non-OK response body:', text);
+          console.error('Non-OK avatar response:', text);
           throw new Error(`Failed to fetch avatar: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log('Fetched avatar data:', data);
         setWorkspaceAvatarUrl(data.data.avatar);
 
       } catch (error) {
@@ -215,7 +235,10 @@ function ChatPanel({
           },
         });
 
+        console.log('User profile response status:', response.status);
+
         const data = await response.json();
+        console.log('User profile data:', data);
 
         if (data.error) {
           throw new Error(data.error);
