@@ -3,30 +3,24 @@ import { SocketProvider } from './context/SocketContext';
 import ChatPanel from './pages/ChatPanel';
 
 interface AppProps {
+  id?: string;
   token?: string;
-  agentId?: string;
-  workspaceId?: string;
-  agentSecret?: string;
   outlineColorDark?: string;
   outlineColorLight?: string;
 }
 
 export default function App({
+  id,
   token,
-  agentId,
-  workspaceId,
-  agentSecret,
   outlineColorDark,
-  outlineColorLight
+  outlineColorLight,
 }: AppProps) {
   return (
     <SocketProvider>
       <AppPageLayout>
         <ChatPanel
+          id={id}
           token={token}
-          agentId={agentId}
-          workspaceId={workspaceId}
-          agentSecret={agentSecret}
           outlineColorDark={outlineColorDark}
           outlineColorLight={outlineColorLight}
         />

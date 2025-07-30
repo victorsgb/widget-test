@@ -33,26 +33,25 @@ interface User {
 }
 
 interface ChatPanelProps {
+  id?: string;
   token?: string;
-  agentId?: string;
-  workspaceId?: string;
-  agentSecret?: string;
   outlineColorDark?: string;
   outlineColorLight?: string;
 }
 
 function ChatPanel({
+  id,
   token,
-  agentId,
-  workspaceId,
-  agentSecret,
   outlineColorDark,
-  outlineColorLight
+  outlineColorLight,
 }: ChatPanelProps) {
- 
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (systemMode || mode) as 'light' | 'dark';
+
+  const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
+  const [agentId, setAgentId] = useState<string | undefined>(undefined);
+  const [agentSecret, setAgentSecret] = useState<string | undefined>(undefined);
 
   const [workspaceAvatarUrl, setWorkspaceAvatarUrl] = useState<
     string | undefined
@@ -60,7 +59,7 @@ function ChatPanel({
 
   const { startContextChat, stopContextChat, contextMessages, whoIsTyping } =
     useSocket();
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [isValidSecret, setIsValidSecret] = useState<boolean>(true);
@@ -102,9 +101,8 @@ function ChatPanel({
       if (!response.ok) {
         const errorData = await response.json();
         throw errorData.error || 'Failure to send message';
-      }   
+      }
       setNewMessage('');
-      
     } catch (err: any) {
       setError(err);
     } finally {
@@ -113,23 +111,40 @@ function ChatPanel({
       // Focus the text input after the next render cycle
       setTimeout(() => {
         inputRef.current?.focus();
-      }, 0);    
+      }, 0);
     }
   };
 
   const handleStartChat = async () => {
     if (!userInfo.name || !userInfo.email) return;
 
-    const newContextId = crypto.randomUUID();
+    try {
+      const response = await fetch(`${env.API_URL}/chats/new-context-id`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'admin-api-key': env.ADMIN_API_KEY,
+        },
+      });
 
-    setContextId(newContextId);
-    setSubmitted(true);
-    startContextChat(newContextId);
- 
-    // Focus the text input after the next render cycle
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);    
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to get context ID: ${response.status} ${errorText}`
+        );
+      }
+
+      const newContextId = await response.text();
+      setContextId(newContextId);
+      setSubmitted(true);
+      startContextChat(newContextId);
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    } catch (error) {
+      console.error('Error starting chat:', error);
+    }
   };
 
   useEffect(() => {
@@ -137,12 +152,46 @@ function ChatPanel({
   }, []);
 
   useEffect(() => {
+    async function decryptAgentRef() {
+      if (!id) return;
+
+      try {
+        const response = await fetch(
+          `${env.API_URL}/workspaces/decrypt-agent-ref`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'admin-api-key': env.ADMIN_API_KEY,
+            },
+            body: JSON.stringify({ encrypted: id }),
+          }
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Failed to decrypt: ${response.status} ${text}`);
+        }
+
+        const data = await response.json();
+        setWorkspaceId(data.data.workspaceId);
+        setAgentId(data.data.agentId);
+        setAgentSecret(data.data.agentSecret);
+      } catch (err) {
+        console.error('Decryption failed:', err);
+      }
+    }
+
+    decryptAgentRef();
+  }, [id]);
+
+  useEffect(() => {
     async function validateSecret() {
       if (!agentId || !agentSecret) {
         setIsValidSecret(false);
         return;
       }
-     
+
       try {
         const response = await fetch(
           `${env.API_URL}/workspaces/${workspaceId}/agents/${agentId}/check-secret`,
@@ -157,7 +206,6 @@ function ChatPanel({
         );
 
         if (!response.ok) {
-          const errorText = await response.text();
           setIsValidSecret(false);
           return;
         }
@@ -170,7 +218,7 @@ function ChatPanel({
     }
 
     if (workspaceId) validateSecret();
-  }, [agentId, workspaceId, agentSecret]);
+  }, [workspaceId, agentId, agentSecret]);
 
   useEffect(() => {
     async function fetchWorkspaceAvatar(workspaceId: string) {
@@ -194,7 +242,6 @@ function ChatPanel({
 
         const data = await response.json();
         setWorkspaceAvatarUrl(data.data.avatar);
-
       } catch (error) {
         console.error('Error fetching workspace avatar:', error);
       }
@@ -377,14 +424,14 @@ function ChatPanel({
           transition: 'box-shadow 0.2s ease-in-out',
 
           '&:hover': {
-            boxShadow: 6, // Equivalent to theme.shadows[6]
+            boxShadow: 6
           },
           '&:focus': {
-            boxShadow: 6,
+            boxShadow: 6
           },
         }}
       >
-        { workspaceId && workspaceAvatarUrl ? (
+        {workspaceId && workspaceAvatarUrl ? (
           <Box
             component="img"
             src={workspaceAvatarUrl}
@@ -443,10 +490,9 @@ function ChatPanel({
                 {!submitted ? (
                   <>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      { token
+                      {token
                         ? 'You will be identified as follows:'
-                        : 'To start, please fill in the information below:'
-                      }
+                        : 'To start, please fill in the information below:'}
                     </Typography>
                     <TextField
                       label="Name"
