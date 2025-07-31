@@ -16,16 +16,12 @@ if (!mountNode) {
 const currentScript = document.currentScript as HTMLScriptElement | null;
 const id = currentScript?.dataset.id;
 const token = currentScript?.dataset.token;
-const outlineColorDark = currentScript?.dataset.outlineColorDark;
-const outlineColorLight = currentScript?.dataset.outlineColorLight;
 
 ReactDOM.createRoot(mountNode).render(
   <StrictMode>
     <App
       id={id}
       token={token}
-      outlineColorDark={outlineColorDark}
-      outlineColorLight={outlineColorLight}
     />
   </StrictMode>
 );

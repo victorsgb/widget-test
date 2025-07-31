@@ -5,15 +5,11 @@ import ChatPanel from './pages/ChatPanel';
 interface AppProps {
   id?: string;
   token?: string;
-  outlineColorDark?: string;
-  outlineColorLight?: string;
 }
 
 export default function App({
   id,
-  token,
-  outlineColorDark,
-  outlineColorLight,
+  token
 }: AppProps) {
   return (
     <SocketProvider>
@@ -21,8 +17,6 @@ export default function App({
         <ChatPanel
           id={id}
           token={token}
-          outlineColorDark={outlineColorDark}
-          outlineColorLight={outlineColorLight}
         />
       </AppPageLayout>
     </SocketProvider>

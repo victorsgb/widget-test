@@ -35,15 +35,11 @@ interface User {
 interface ChatPanelProps {
   id?: string;
   token?: string;
-  outlineColorDark?: string;
-  outlineColorLight?: string;
 }
 
 function ChatPanel({
   id,
-  token,
-  outlineColorDark,
-  outlineColorLight,
+  token
 }: ChatPanelProps) {
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
@@ -52,6 +48,8 @@ function ChatPanel({
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
   const [agentId, setAgentId] = useState<string | undefined>(undefined);
   const [agentSecret, setAgentSecret] = useState<string | undefined>(undefined);
+  const [outlineColorDark, setOutlineColorDark] = useState<string | undefined>(theme.palette.primary.main);
+  const [outlineColorLight, setOutlineColorLight] = useState<string | undefined>(theme.palette.primary.light);
 
   const [workspaceAvatarUrl, setWorkspaceAvatarUrl] = useState<
     string | undefined
@@ -251,6 +249,36 @@ function ChatPanel({
       fetchWorkspaceAvatar(workspaceId);
     }
   }, [workspaceId]);
+
+  useEffect(() => {
+    async function fetchWidgetOutlineColors() {
+      if (!agentId) return;
+
+      try {
+        const response = await fetch(`${env.API_URL}/agent/${agentId}/widget-outline-colors`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'admin-api-key': env.ADMIN_API_KEY,
+          },
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Failed to fetch outline colors: ${response.status} ${text}`);
+        }
+
+        const data = await response.json();
+
+        if (data.outlineColorDark) setOutlineColorDark(data.outlineColorDark);
+        if (data.outlineColorLight) setOutlineColorLight(data.outlineColorLight);
+      } catch (error) {
+        console.error('Error fetching widget outline colors:', error);
+      }
+    }
+
+    fetchWidgetOutlineColors();
+  }, [agentId]);  
 
   useEffect(() => {
     async function fetchUserProfile(token: string) {
