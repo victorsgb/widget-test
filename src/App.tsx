@@ -7,17 +7,11 @@ interface AppProps {
   token?: string;
 }
 
-export default function App({
-  id,
-  token
-}: AppProps) {
+export default function App({ id, token }: AppProps) {
   return (
     <SocketProvider>
       <AppPageLayout>
-        <ChatPanel
-          id={id}
-          token={token}
-        />
+        <ChatPanel id={id} token={token} />
       </AppPageLayout>
     </SocketProvider>
   );

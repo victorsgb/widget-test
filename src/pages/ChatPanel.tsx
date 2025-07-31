@@ -37,10 +37,7 @@ interface ChatPanelProps {
   token?: string;
 }
 
-function ChatPanel({
-  id,
-  token
-}: ChatPanelProps) {
+function ChatPanel({ id, token }: ChatPanelProps) {
   const theme = useTheme();
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (systemMode || mode) as 'light' | 'dark';
@@ -48,8 +45,12 @@ function ChatPanel({
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
   const [agentId, setAgentId] = useState<string | undefined>(undefined);
   const [agentSecret, setAgentSecret] = useState<string | undefined>(undefined);
-  const [outlineColorDark, setOutlineColorDark] = useState<string | undefined>(theme.palette.primary.main);
-  const [outlineColorLight, setOutlineColorLight] = useState<string | undefined>(theme.palette.primary.light);
+  const [outlineColorDark, setOutlineColorDark] = useState<string | undefined>(
+    theme.palette.primary.main
+  );
+  const [outlineColorLight, setOutlineColorLight] = useState<
+    string | undefined
+  >(theme.palette.primary.light);
 
   const [workspaceAvatarUrl, setWorkspaceAvatarUrl] = useState<
     string | undefined
@@ -255,30 +256,37 @@ function ChatPanel({
       if (!agentId) return;
 
       try {
-        const response = await fetch(`${env.API_URL}/agent/${agentId}/widget-outline-colors`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'admin-api-key': env.ADMIN_API_KEY,
-          },
-        });
+        const response = await fetch(
+          `${env.API_URL}/agent/${agentId}/widget-outline-colors`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'admin-api-key': env.ADMIN_API_KEY,
+            },
+          }
+        );
 
         if (!response.ok) {
           const text = await response.text();
-          throw new Error(`Failed to fetch outline colors: ${response.status} ${text}`);
+          throw new Error(
+            `Failed to fetch outline colors: ${response.status} ${text}`
+          );
         }
 
         const data = await response.json();
 
-        if (data.outlineColorDark) setOutlineColorDark(data.outlineColorDark);
-        if (data.outlineColorLight) setOutlineColorLight(data.outlineColorLight);
+        if (data.data.outlineColorDark)
+          setOutlineColorDark(data.data.outlineColorDark);
+        if (data.data.outlineColorLight)
+          setOutlineColorLight(data.data.outlineColorLight);
       } catch (error) {
         console.error('Error fetching widget outline colors:', error);
       }
     }
 
     fetchWidgetOutlineColors();
-  }, [agentId]);  
+  }, [agentId]);
 
   useEffect(() => {
     async function fetchUserProfile(token: string) {
@@ -452,10 +460,10 @@ function ChatPanel({
           transition: 'box-shadow 0.2s ease-in-out',
 
           '&:hover': {
-            boxShadow: 6
+            boxShadow: 6,
           },
           '&:focus': {
-            boxShadow: 6
+            boxShadow: 6,
           },
         }}
       >

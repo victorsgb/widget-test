@@ -19,9 +19,6 @@ const token = currentScript?.dataset.token;
 
 ReactDOM.createRoot(mountNode).render(
   <StrictMode>
-    <App
-      id={id}
-      token={token}
-    />
+    <App id={id} token={token} />
   </StrictMode>
 );
