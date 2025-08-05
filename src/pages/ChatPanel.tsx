@@ -42,6 +42,8 @@ function ChatPanel({ id, token }: ChatPanelProps) {
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (systemMode || mode) as 'light' | 'dark';
 
+  const [adminApiKey, setAdminApiKey] = useState<string | undefined>(undefined);
+  const [socketServerUrl, setSocketServerUrl] = useState<string | undefined>(undefined);
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
   const [agentId, setAgentId] = useState<string | undefined>(undefined);
   const [agentSecret, setAgentSecret] = useState<string | undefined>(undefined);
@@ -92,7 +94,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'admin-api-key': env.ADMIN_API_KEY,
+          'admin-api-key': adminApiKey || '',
         },
         body: JSON.stringify(body),
       });
@@ -122,7 +124,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'admin-api-key': env.ADMIN_API_KEY,
+          'admin-api-key': adminApiKey || '',
         },
       });
 
@@ -136,7 +138,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
       const newContextId = await response.text();
       setContextId(newContextId);
       setSubmitted(true);
-      startContextChat(newContextId);
+      startContextChat(newContextId, socketServerUrl || '');
 
       setTimeout(() => {
         inputRef.current?.focus();
@@ -160,8 +162,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
           {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'admin-api-key': env.ADMIN_API_KEY,
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ encrypted: id }),
           }
@@ -176,6 +177,8 @@ function ChatPanel({ id, token }: ChatPanelProps) {
         setWorkspaceId(data.data.workspaceId);
         setAgentId(data.data.agentId);
         setAgentSecret(data.data.agentSecret);
+        setAdminApiKey(data.data.adminApiKey);
+        setSocketServerUrl(data.data.socketServerUrl);
       } catch (err) {
         console.error('Decryption failed:', err);
       }
@@ -198,7 +201,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'admin-api-key': env.ADMIN_API_KEY,
+              'admin-api-key': adminApiKey || '',
             },
             body: JSON.stringify({ secret: agentSecret }),
           }
@@ -228,7 +231,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'admin-api-key': env.ADMIN_API_KEY,
+              'admin-api-key': adminApiKey || '',
             },
           }
         );
@@ -262,7 +265,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'admin-api-key': env.ADMIN_API_KEY,
+              'admin-api-key': adminApiKey || '',
             },
           }
         );

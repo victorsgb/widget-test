@@ -1,14 +1,10 @@
 interface EnvConfig {
-  SOCKET_SERVER_URL: string;
   API_URL: string;
-  ADMIN_API_KEY: string;
 }
 
 // Parse environment variables with proper type conversion
 export const env: EnvConfig = {
-  SOCKET_SERVER_URL: import.meta.env.VITE_SOCKET_SERVER_URL as string,
   API_URL: import.meta.env.VITE_API_URL as string,
-  ADMIN_API_KEY: import.meta.env.VITE_ADMIN_API_KEY as string,
 };
 
 // Validate required environment variables

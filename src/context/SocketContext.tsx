@@ -1,6 +1,5 @@
 import { createContext, useRef, ReactNode, useContext, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import env from '../config/env';
 
 export interface MessageContextChatUpdatePayload {
   id: string;
@@ -11,7 +10,7 @@ export interface MessageContextChatUpdatePayload {
 }
 
 interface SocketContextType {
-  startContextChat: (contextId: string) => void;
+  startContextChat: (contextId: string, socketServerUrl: string) => void;
   stopContextChat: () => void;
   whoIsTyping:
     | { type: 'user' | 'assistant' | 'system'; name: string }
@@ -26,9 +25,6 @@ interface SocketProviderProps {
 const SocketContext = createContext<SocketContextType | null>(null);
 
 export function SocketProvider({ children }: SocketProviderProps) {
-  const SOCKET_SERVER_URL: string =
-    env.SOCKET_SERVER_URL || 'http://localhost:3000';
-
   const socketPublicRef = useRef<Socket | null>(null);
 
   const [whoIsTyping, setWhoIsTyping] = useState<
@@ -56,9 +52,9 @@ export function SocketProvider({ children }: SocketProviderProps) {
     setWhoIsTyping(undefined);
   };
 
-  const startContextChat = (contextId: string) => {
+  const startContextChat = (contextId: string, socketServerUrl: string) => {
     stopContextChat();
-    socketPublicRef.current = io(SOCKET_SERVER_URL, {
+    socketPublicRef.current = io(socketServerUrl, {
       auth: { contextId },
       transports: ['websocket'],
     });
