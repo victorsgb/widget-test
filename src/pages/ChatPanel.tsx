@@ -226,7 +226,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
     async function fetchWidgetAgentAvatar(agentId: string) {
       try {
         const response = await fetch(
-          `${env.API_URL}/agent/${agentId}/avatar`,
+          `${env.API_URL}/agent/${agentId}/avatar-widget`,
           {
             method: 'GET',
             headers: {
