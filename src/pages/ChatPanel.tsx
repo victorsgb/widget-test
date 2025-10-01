@@ -54,7 +54,7 @@ function ChatPanel({ id, token }: ChatPanelProps) {
     string | undefined
   >(theme.palette.primary.light);
 
-  const [workspaceAvatarUrl, setWorkspaceAvatarUrl] = useState<
+  const [widgetAvatarUrl, setWidgetAvatarUrl] = useState<
     string | undefined
   >(undefined);
 
@@ -223,10 +223,10 @@ function ChatPanel({ id, token }: ChatPanelProps) {
   }, [workspaceId, agentId, agentSecret]);
 
   useEffect(() => {
-    async function fetchWorkspaceAvatar(workspaceId: string) {
+    async function fetchWidgetAgentAvatar(agentId: string) {
       try {
         const response = await fetch(
-          `${env.API_URL}/workspaces/${workspaceId}/avatar`,
+          `${env.API_URL}/agent/${agentId}/avatar`,
           {
             method: 'GET',
             headers: {
@@ -243,16 +243,16 @@ function ChatPanel({ id, token }: ChatPanelProps) {
         }
 
         const data = await response.json();
-        setWorkspaceAvatarUrl(data.data.avatar);
+        setWidgetAvatarUrl(data.data.avatar);
       } catch (error) {
         console.error('Error fetching workspace avatar:', error);
       }
     }
 
-    if (workspaceId) {
-      fetchWorkspaceAvatar(workspaceId);
+    if (agentId) {
+      fetchWidgetAgentAvatar(agentId);
     }
-  }, [workspaceId]);
+  }, [agentId]);
 
   useEffect(() => {
     async function fetchWidgetOutlineColors() {
@@ -470,11 +470,11 @@ function ChatPanel({ id, token }: ChatPanelProps) {
           },
         }}
       >
-        {workspaceId && workspaceAvatarUrl ? (
+        {agentId && widgetAvatarUrl ? (
           <Box
             component="img"
-            src={workspaceAvatarUrl}
-            alt="Workspace Logo"
+            src={widgetAvatarUrl}
+            alt="Widget Logo"
             sx={{
               width: 32,
               height: 32,
